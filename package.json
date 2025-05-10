@@ -6,7 +6,7 @@
   "description": "任务创建、状态流转、优先级与截止日期管理",
   "scripts": {
     "start": "node server.mjs",
-    "test": "node --test core.test.js",
+    "test": "node --test",
     "check": "node --check core.js && node --check app.js && node --check server.mjs && node --check history.mjs",
     "history": "node history.mjs"
   },

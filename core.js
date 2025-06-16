@@ -26,3 +26,14 @@ export function normalizeTask(input) {
   return { id: input.id, title, notes, status: input.status, priority: input.priority, due, tags: [...new Set(tags.map(tag => tag.trim()))], createdAt: new Date(input.createdAt).toISOString() };
 }
 
+export function validateState(input) {
+  if (!input || typeof input !== 'object') throw new Error('备份必须是对象');
+  if (input.version !== 1) throw new Error('不支持此备份版本');
+  if (!Array.isArray(input.tasks)) throw new Error('备份缺少任务列表');
+  if (input.tasks.length > 500) throw new Error('最多支持 500 个任务');
+  const tasks = input.tasks.map(normalizeTask);
+  const ids = new Set(tasks.map(task => task.id));
+  if (ids.size !== tasks.length) throw new Error('备份包含重复任务 ID');
+  return { version: 1, tasks };
+}
+

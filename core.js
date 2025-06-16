@@ -37,3 +37,14 @@ export function validateState(input) {
   return { version: 1, tasks };
 }
 
+export function createTask(state, fields, id = crypto.randomUUID(), now = new Date().toISOString()) {
+  const valid = validateState(state);
+  if (valid.tasks.length >= 500) throw new Error('任务已达 500 个，请先清理');
+  if (valid.tasks.some(task => task.id === id)) throw new Error('任务 ID 已存在');
+  const task = normalizeTask({ title: '', notes: '', priority: 'medium', status: 'todo', due: '', tags: [], ...fields, id, createdAt: now });
+  const tasks = [...valid.tasks, task];
+  const result = { version: 1, tasks };
+  validateState(result);
+  return result;
+}
+

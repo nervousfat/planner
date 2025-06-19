@@ -70,3 +70,14 @@ export function moveTask(state, id, status) {
   return result;
 }
 
+export function removeTask(state, id) {
+  const valid = validateState(state);
+  if (typeof id !== 'string') throw new Error('任务 ID 不正确');
+  const found = valid.tasks.some(task => task.id === id);
+  if (!found) throw new Error('找不到该任务');
+  const tasks = valid.tasks.filter(task => task.id !== id);
+  const result = { version: 1, tasks };
+  if (tasks.length !== valid.tasks.length - 1) throw new Error('删除任务失败');
+  return result;
+}
+

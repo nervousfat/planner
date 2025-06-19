@@ -59,3 +59,14 @@ export function updateTask(state, id, fields) {
   return { version: 1, tasks };
 }
 
+export function moveTask(state, id, status) {
+  if (!STATUSES.includes(status)) throw new Error('请选择有效状态');
+  const valid = validateState(state);
+  const task = valid.tasks.find(item => item.id === id);
+  if (!task) throw new Error('找不到该任务');
+  if (task.status === status) return valid;
+  const fields = { status };
+  const result = updateTask(valid, id, fields);
+  return result;
+}
+

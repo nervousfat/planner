@@ -48,3 +48,14 @@ export function createTask(state, fields, id = crypto.randomUUID(), now = new Da
   return result;
 }
 
+export function updateTask(state, id, fields) {
+  const valid = validateState(state);
+  const index = valid.tasks.findIndex(task => task.id === id);
+  if (index < 0) throw new Error('找不到该任务');
+  const original = valid.tasks[index];
+  const task = normalizeTask({ ...original, ...fields, id: original.id, createdAt: original.createdAt });
+  const tasks = [...valid.tasks];
+  tasks[index] = task;
+  return { version: 1, tasks };
+}
+

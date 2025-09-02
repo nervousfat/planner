@@ -81,3 +81,17 @@ export function removeTask(state, id) {
   return result;
 }
 
+export function queryTasks(tasks, filters = {}, today = new Date().toISOString().slice(0, 10)) {
+  if (!isDate(today)) throw new Error('参考日期不正确');
+  const query = String(filters.search ?? '').trim().toLocaleLowerCase();
+  return tasks.filter(task => {
+    if (filters.priority && task.priority !== filters.priority) return false;
+    if (filters.status && task.status !== filters.status) return false;
+    if (filters.due === 'overdue' && (!task.due || task.due >= today || task.status === 'done')) return false;
+    if (filters.due === 'today' && (task.due !== today || task.status === 'done')) return false;
+    if (filters.due === 'none' && task.due) return false;
+    const text = [task.title, task.notes, ...task.tags].join(' ').toLocaleLowerCase();
+    return !query || text.includes(query);
+  });
+}
+

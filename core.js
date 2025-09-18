@@ -95,3 +95,15 @@ export function queryTasks(tasks, filters = {}, today = new Date().toISOString()
   });
 }
 
+export function sortTasks(tasks, mode = 'priority') {
+  const allowed = ['priority', 'due', 'newest', 'title'];
+  if (!allowed.includes(mode)) throw new Error('排序方式不正确');
+  const result = [...tasks];
+  const byCreated = (a, b) => b.createdAt.localeCompare(a.createdAt) || a.id.localeCompare(b.id);
+  if (mode === 'priority') result.sort((a, b) => PRIORITIES.indexOf(a.priority) - PRIORITIES.indexOf(b.priority) || byCreated(a, b));
+  if (mode === 'due') result.sort((a, b) => (a.due || '9999-12-31').localeCompare(b.due || '9999-12-31') || byCreated(a, b));
+  if (mode === 'newest') result.sort(byCreated);
+  if (mode === 'title') result.sort((a, b) => a.title.localeCompare(b.title, 'zh-CN') || byCreated(a, b));
+  return result;
+}
+

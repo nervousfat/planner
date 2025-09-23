@@ -107,3 +107,15 @@ export function sortTasks(tasks, mode = 'priority') {
   return result;
 }
 
+export function summarize(tasks, today) {
+  if (!isDate(today)) throw new Error('参考日期不正确');
+  const total = tasks.length;
+  const done = tasks.filter(task => task.status === 'done').length;
+  const active = total - done;
+  const overdue = tasks.filter(task => task.status !== 'done' && task.due && task.due < today).length;
+  const dueToday = tasks.filter(task => task.status !== 'done' && task.due === today).length;
+  const high = tasks.filter(task => task.status !== 'done' && task.priority === 'high').length;
+  const percent = total === 0 ? 0 : Math.round(done / total * 100);
+  return { total, done, active, overdue, dueToday, high, percent };
+}
+

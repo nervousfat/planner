@@ -119,3 +119,15 @@ export function summarize(tasks, today) {
   return { total, done, active, overdue, dueToday, high, percent };
 }
 
+export function dueLabel(task, today) {
+  if (!isDate(today)) throw new Error('参考日期不正确');
+  if (!task.due) return { text: '未设截止日', tone: 'neutral' };
+  if (!isDate(task.due)) throw new Error('截止日期不正确');
+  if (task.status === 'done') return { text: task.due, tone: 'neutral' };
+  const delta = Math.round((Date.parse(task.due) - Date.parse(today)) / 86400000);
+  if (delta < 0) return { text: `已逾期 ${-delta} 天`, tone: 'danger' };
+  if (delta === 0) return { text: '今天截止', tone: 'warning' };
+  if (delta === 1) return { text: '明天截止', tone: 'warning' };
+  return { text: task.due, tone: 'neutral' };
+}
+

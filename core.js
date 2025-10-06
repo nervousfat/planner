@@ -131,3 +131,15 @@ export function dueLabel(task, today) {
   return { text: task.due, tone: 'neutral' };
 }
 
+export function groupByStatus(tasks) {
+  if (!Array.isArray(tasks)) throw new Error('任务列表不正确');
+  const groups = { todo: [], doing: [], done: [] };
+  for (const task of tasks) {
+    if (!STATUSES.includes(task.status)) throw new Error('任务状态不正确');
+    groups[task.status].push(task);
+  }
+  const count = Object.values(groups).reduce((sum, group) => sum + group.length, 0);
+  if (count !== tasks.length) throw new Error('任务分组失败');
+  return groups;
+}
+

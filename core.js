@@ -154,3 +154,15 @@ export function exportState(state) {
   return text;
 }
 
+export function importState(text) {
+  if (typeof text !== 'string') throw new Error('请选择 JSON 文本文件');
+  if (new TextEncoder().encode(text).byteLength > 2_000_000) throw new Error('备份文件不能超过 2 MB');
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new Error('JSON 文件格式不正确');
+  }
+  return validateState(parsed);
+}
+

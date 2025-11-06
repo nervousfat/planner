@@ -143,3 +143,14 @@ export function groupByStatus(tasks) {
   return groups;
 }
 
+export function exportState(state) {
+  const valid = validateState(state);
+  const document = {
+    version: valid.version,
+    tasks: valid.tasks
+  };
+  const text = JSON.stringify(document, null, 2);
+  if (new TextEncoder().encode(text).byteLength > 2_000_000) throw new Error('备份文件不能超过 2 MB');
+  return text;
+}
+

@@ -166,3 +166,16 @@ export function importState(text) {
   return validateState(parsed);
 }
 
+export function sampleState(today) {
+  if (!isDate(today)) throw new Error('参考日期不正确');
+  const createdAt = today + 'T09:00:00.000Z';
+  const definitions = [
+    { id: 'sample-1', title: '整理本周的产品想法', notes: '写下三个值得继续探索的方向，选择一个先做原型。', priority: 'high', status: 'todo', due: today, tags: ['产品', '本周'] },
+    { id: 'sample-2', title: '完成首页视觉草图', notes: '先确定信息层级，再选择颜色与字体。', priority: 'medium', status: 'doing', due: '', tags: ['设计'] },
+    { id: 'sample-3', title: '读完一章并记录笔记', notes: '只记下能够应用到实际工作中的三个观点。', priority: 'low', status: 'todo', due: '', tags: ['学习'] },
+    { id: 'sample-4', title: '建立一个轻量工作台', notes: '把任务都放在同一个地方。', priority: 'medium', status: 'done', due: '', tags: ['生活'] }
+  ];
+  const tasks = definitions.map(fields => normalizeTask({ ...fields, createdAt }));
+  return validateState({ version: 1, tasks });
+}
+

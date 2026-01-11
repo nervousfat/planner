@@ -179,3 +179,14 @@ export function sampleState(today) {
   return validateState({ version: 1, tasks });
 }
 
+export function clearCompleted(state) {
+  const valid = validateState(state);
+  const complete = valid.tasks.filter(task => task.status === 'done');
+  if (complete.length === 0) return valid;
+  const tasks = valid.tasks.filter(task => task.status !== 'done');
+  const result = { version: 1, tasks };
+  validateState(result);
+  if (tasks.length + complete.length !== valid.tasks.length) throw new Error('清理任务失败');
+  return result;
+}
+

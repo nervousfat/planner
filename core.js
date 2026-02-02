@@ -190,3 +190,14 @@ export function clearCompleted(state) {
   return result;
 }
 
+export function nextStatus(status, direction = 1) {
+  const index = STATUSES.indexOf(status);
+  if (index < 0) throw new Error('任务状态不正确');
+  if (direction !== 1 && direction !== -1) throw new Error('状态移动方向不正确');
+  const destination = index + direction;
+  if (destination < 0) return STATUSES[0];
+  if (destination >= STATUSES.length) return STATUSES.at(-1);
+  const next = STATUSES[destination];
+  return next;
+}
+

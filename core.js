@@ -212,3 +212,15 @@ export function duplicateTask(state, id, newId = crypto.randomUUID(), now = new 
   return result;
 }
 
+export function upcomingDays(tasks, today, count = 7) {
+  if (!isDate(today)) throw new Error('参考日期不正确');
+  if (!Number.isInteger(count) || count < 1 || count > 31) throw new Error('天数应为 1–31');
+  const start = Date.parse(today);
+  return Array.from({ length: count }, (_, index) => {
+    const date = new Date(start + index * 86400000).toISOString().slice(0, 10);
+    const matching = tasks.filter(task => task.status !== 'done' && task.due === date);
+    const high = matching.filter(task => task.priority === 'high').length;
+    return { date, count: matching.length, high };
+  });
+}
+

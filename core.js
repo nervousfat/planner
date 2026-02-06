@@ -201,3 +201,14 @@ export function nextStatus(status, direction = 1) {
   return next;
 }
 
+export function duplicateTask(state, id, newId = crypto.randomUUID(), now = new Date().toISOString()) {
+  const valid = validateState(state);
+  const source = valid.tasks.find(task => task.id === id);
+  if (!source) throw new Error('找不到该任务');
+  const suffix = '（副本）';
+  const title = source.title.slice(0, 120 - suffix.length) + suffix;
+  const fields = { ...source, title, status: 'todo', tags: [...source.tags] };
+  const result = createTask(valid, fields, newId, now);
+  return result;
+}
+

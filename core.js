@@ -224,3 +224,14 @@ export function upcomingDays(tasks, today, count = 7) {
   });
 }
 
+export function collectTags(tasks) {
+  if (!Array.isArray(tasks)) throw new Error('任务列表不正确');
+  const counts = new Map();
+  for (const task of tasks) {
+    for (const tag of new Set(task.tags)) {
+      counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    }
+  }
+  const tags = [...counts].map(([tag, count]) => ({ tag, count }));
+  return tags.sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag, 'zh-CN'));
+}

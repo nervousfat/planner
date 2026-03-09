@@ -37,3 +37,15 @@ test('创建拒绝无效字段且保持现有数据', () => {
   assert.equal(state.tasks.length, 1);
 });
 
+test('更新保留标识和创建时间，移动状态可逆', () => {
+  const state = add();
+  const changed = core.updateTask(state, 'one', { title: '已修改', id: 'hijack', createdAt: 'bad' });
+  assert.equal(changed.tasks[0].id, 'one');
+  assert.equal(changed.tasks[0].createdAt, state.tasks[0].createdAt);
+  assert.equal(state.tasks[0].title, '测试任务');
+  const done = core.moveTask(changed, 'one', 'done');
+  assert.equal(done.tasks[0].status, 'done');
+  assert.equal(core.moveTask(done, 'one', 'todo').tasks[0].status, 'todo');
+  assert.throws(() => core.updateTask(state, 'missing', {}), /找不到/);
+});
+

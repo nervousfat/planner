@@ -26,3 +26,14 @@ test('创建任务规范化标题且不修改旧状态', () => {
   assert.equal(state.tasks[0].status, 'todo');
 });
 
+test('创建拒绝无效字段且保持现有数据', () => {
+  const state = add();
+  assert.throws(() => add(state, { title: '  ' }, 'two'), /名称/);
+  assert.throws(() => add(state, { due: '2025-02-29' }, 'two'), /日期/);
+  assert.throws(() => add(state, { priority: 'urgent' }, 'two'), /优先级/);
+  assert.throws(() => add(state, { status: 'unknown' }, 'two'), /状态/);
+  assert.throws(() => add(state, { tags: [2] }, 'two'), /标签/);
+  assert.throws(() => add(state, {}, 'one'), /已存在/);
+  assert.equal(state.tasks.length, 1);
+});
+

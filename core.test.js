@@ -49,3 +49,14 @@ test('更新保留标识和创建时间，移动状态可逆', () => {
   assert.throws(() => core.updateTask(state, 'missing', {}), /找不到/);
 });
 
+test('移除只影响指定任务，未知标识给出错误', () => {
+  const first = add();
+  const state = add(first, { title: '保留任务' }, 'two');
+  const result = core.removeTask(state, 'one');
+  assert.equal(result.tasks.length, 1);
+  assert.equal(result.tasks[0].id, 'two');
+  assert.equal(state.tasks.length, 2);
+  assert.throws(() => core.removeTask(state, 'missing'), /找不到/);
+  assert.throws(() => core.removeTask(state, 2), /ID/);
+});
+

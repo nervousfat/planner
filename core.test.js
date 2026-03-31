@@ -60,3 +60,14 @@ test('移除只影响指定任务，未知标识给出错误', () => {
   assert.throws(() => core.removeTask(state, 2), /ID/);
 });
 
+test('搜索覆盖备注标签并组合优先级和截止日', () => {
+  const first = add(empty(), { notes: 'REVIEW 文档', due: today, priority: 'high' });
+  const state = add(first, { title: '另一个', tags: ['Review'], due: '2026-09-09' }, 'two');
+  assert.equal(core.queryTasks(state.tasks, { search: 'review' }, today).length, 2);
+  assert.equal(core.queryTasks(state.tasks, { search: 'review', priority: 'high' }, today).length, 1);
+  assert.equal(core.queryTasks(state.tasks, { due: 'today' }, today)[0].id, 'one');
+  assert.equal(core.queryTasks(state.tasks, { due: 'overdue' }, today)[0].id, 'two');
+  assert.equal(core.queryTasks(state.tasks, { search: '不存在' }, today).length, 0);
+  assert.throws(() => core.queryTasks(state.tasks, {}, 'bad'), /日期/);
+});
+

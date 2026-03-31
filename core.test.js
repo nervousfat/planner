@@ -71,3 +71,14 @@ test('搜索覆盖备注标签并组合优先级和截止日', () => {
   assert.throws(() => core.queryTasks(state.tasks, {}, 'bad'), /日期/);
 });
 
+test('排序以优先级和截止日为准且不修改原数组', () => {
+  const a = add(empty(), { priority: 'low' });
+  const b = add(a, { priority: 'high', due: today }, 'two');
+  const c = add(b, { priority: 'medium', due: '2026-09-09' }, 'three');
+  assert.deepEqual(core.sortTasks(c.tasks).map(task => task.id), ['two', 'three', 'one']);
+  assert.deepEqual(core.sortTasks(c.tasks, 'due').map(task => task.id), ['three', 'two', 'one']);
+  assert.equal(c.tasks[0].id, 'one');
+  assert.throws(() => core.sortTasks(c.tasks, 'random'), /排序/);
+  assert.equal(core.sortTasks([], 'newest').length, 0);
+});
+

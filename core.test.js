@@ -93,3 +93,15 @@ test('统计不把已完成任务计入逾期或今日待办', () => {
   assert.equal(core.dueLabel(c.tasks[2], today).text, '今天截止');
 });
 
+test('状态分组和边界移动保持任务数量', () => {
+  const state = core.sampleState(today);
+  const groups = core.groupByStatus(state.tasks);
+  assert.equal(groups.todo.length, 2);
+  assert.equal(groups.doing.length, 1);
+  assert.equal(groups.done.length, 1);
+  assert.equal(core.nextStatus('todo', -1), 'todo');
+  assert.equal(core.nextStatus('doing', 1), 'done');
+  assert.equal(core.nextStatus('done', 1), 'done');
+  assert.throws(() => core.nextStatus('todo', 0), /方向/);
+});
+

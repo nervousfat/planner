@@ -82,3 +82,14 @@ test('排序以优先级和截止日为准且不修改原数组', () => {
   assert.equal(core.sortTasks([], 'newest').length, 0);
 });
 
+test('统计不把已完成任务计入逾期或今日待办', () => {
+  const a = add(empty(), { due: '2026-09-09', priority: 'high' });
+  const b = add(a, { status: 'done', due: '2026-09-08' }, 'two');
+  const c = add(b, { due: today }, 'three');
+  assert.deepEqual(core.summarize(c.tasks, today), { total: 3, done: 1, active: 2, overdue: 1, dueToday: 1, high: 1, percent: 33 });
+  assert.equal(core.summarize([], today).percent, 0);
+  assert.equal(core.dueLabel(c.tasks[0], today).tone, 'danger');
+  assert.equal(core.dueLabel(c.tasks[1], today).tone, 'neutral');
+  assert.equal(core.dueLabel(c.tasks[2], today).text, '今天截止');
+});
+

@@ -105,3 +105,14 @@ test('状态分组和边界移动保持任务数量', () => {
   assert.throws(() => core.nextStatus('todo', 0), /方向/);
 });
 
+test('备份往返完整保留中文和用户文本', () => {
+  const state = add(empty(), { title: '<img src=x>', notes: '中文\n第二行', tags: ['记录'] });
+  const text = core.exportState(state);
+  const restored = core.importState(text);
+  assert.deepEqual(restored, state);
+  assert.equal(restored.tasks[0].title, '<img src=x>');
+  assert.equal(restored.tasks[0].notes, '中文\n第二行');
+  restored.tasks[0].tags.push('新增');
+  assert.deepEqual(state.tasks[0].tags, ['记录']);
+});
+

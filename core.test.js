@@ -116,3 +116,17 @@ test('备份往返完整保留中文和用户文本', () => {
   assert.deepEqual(state.tasks[0].tags, ['记录']);
 });
 
+test('导入拒绝坏 JSON、版本、重复 ID 和无效任务', () => {
+  const state = add();
+  assert.throws(() => core.importState('{'), /JSON/);
+  assert.throws(() => core.importState('null'), /对象/);
+  assert.throws(() => core.importState('{"version":2,"tasks":[]}'), /版本/);
+  assert.throws(() => core.importState(JSON.stringify({ ...state, tasks: [state.tasks[0], state.tasks[0]] })), /重复/);
+  assert.throws(() => core.importState(JSON.stringify({ ...state, tasks: [{ ...state.tasks[0], due: '2026-02-30' }] })), /日期/);
+  assert.throws(() => core.importState('x'.repeat(2_000_001)), /2 MB/);
+  assert.throws(() => core.importState('汉'.repeat(700_001)), /2 MB/);
+  assert.throws(() => core.importState(JSON.stringify({ ...state, tasks: [{ ...state.tasks[0], createdAt: '2026-02-30T09:00:00.000Z' }] })), /创建时间/);
+  assert.throws(() => core.importState(JSON.stringify({ ...state, tasks: [{ ...state.tasks[0], createdAt: '2026-09-10T24:00:00.000Z' }] })), /创建时间/);
+  assert.equal(state.tasks.length, 1);
+});
+

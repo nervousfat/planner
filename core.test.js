@@ -152,3 +152,13 @@ test('清理完成任务保留其余任务和原始状态', () => {
   assert.throws(() => core.moveTask(state, 'sample-1', 'invalid'), /状态/);
 });
 
+test('未来日期跨月正确汇总，标签按频率排列', () => {
+  const a = add(empty(), { due: '2026-10-01', tags: ['共享', '独立'], priority: 'high' });
+  const b = add(a, { due: '2026-10-01', tags: ['共享'], status: 'done' }, 'two');
+  const days = core.upcomingDays(b.tasks, '2026-09-30', 3);
+  assert.deepEqual(days.map(day => day.date), ['2026-09-30', '2026-10-01', '2026-10-02']);
+  assert.equal(days[1].count, 1);
+  assert.equal(days[1].high, 1);
+  assert.deepEqual(core.collectTags(b.tasks), [{ tag: '共享', count: 2 }, { tag: '独立', count: 1 }]);
+  assert.throws(() => core.upcomingDays(b.tasks, today, 0), /天数/);
+});

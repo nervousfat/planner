@@ -130,3 +130,14 @@ test('导入拒绝坏 JSON、版本、重复 ID 和无效任务', () => {
   assert.equal(state.tasks.length, 1);
 });
 
+test('复制创建新任务并截断长标题，标签互相独立', () => {
+  const state = add(empty(), { title: '字'.repeat(120), status: 'done', tags: ['工作'] });
+  const copied = core.duplicateTask(state, 'one', 'copy', today + 'T10:00:00Z');
+  assert.equal(copied.tasks.length, 2);
+  assert.equal(copied.tasks[1].title.length, 120);
+  assert.equal(copied.tasks[1].status, 'todo');
+  assert.equal(copied.tasks[1].id, 'copy');
+  copied.tasks[1].tags.push('新标签');
+  assert.deepEqual(copied.tasks[0].tags, ['工作']);
+});
+

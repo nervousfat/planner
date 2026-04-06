@@ -141,3 +141,14 @@ test('复制创建新任务并截断长标题，标签互相独立', () => {
   assert.deepEqual(copied.tasks[0].tags, ['工作']);
 });
 
+test('清理完成任务保留其余任务和原始状态', () => {
+  const state = core.sampleState(today);
+  const cleaned = core.clearCompleted(state);
+  assert.equal(cleaned.tasks.length, 3);
+  assert.equal(state.tasks.length, 4);
+  assert.equal(cleaned.tasks.some(task => task.status === 'done'), false);
+  assert.deepEqual(core.clearCompleted(cleaned), cleaned);
+  assert.deepEqual(core.clearCompleted(empty()), empty());
+  assert.throws(() => core.moveTask(state, 'sample-1', 'invalid'), /状态/);
+});
+

@@ -15,3 +15,11 @@ test('nextStatus rejects unknown statuses and directions', () => {
   assert.throws(() => core.nextStatus('todo', 0), /状态移动方向不正确/);
   assert.throws(() => core.nextStatus('todo', 2), /状态移动方向不正确/);
 });
+test('nextStatus walks the canonical list without escaping it', () => {
+  assert.deepEqual(core.STATUSES, ['todo', 'doing', 'done']);
+  let current = 'todo';
+  for (const expected of ['doing', 'done', 'done']) {
+    current = core.nextStatus(current);
+    assert.equal(current, expected);
+  }
+});

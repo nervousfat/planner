@@ -23,3 +23,7 @@ test('collectTags ignores repeated tags within one task', () => {
   assert.deepEqual(core.collectTags(tasks).map(item => item.tag), ['plan', 'work']);
   assert.deepEqual(core.collectTags(tasks).map(item => item.count), [1, 1]);
 });
+test('collectTags accepts empty lists and rejects non-arrays', () => {
+  assert.deepEqual(core.collectTags([]), []);
+  assert.throws(() => core.collectTags('nope'), /任务列表不正确/);
+});

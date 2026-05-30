@@ -21,3 +21,15 @@ test('upcomingDays buckets open tasks by date', () => {
   assert.deepEqual(days[1], { date: '2026-04-14', count: 0, high: 0 });
   assert.deepEqual(days[2], { date: '2026-04-15', count: 1, high: 0 });
 });
+test('upcomingDays validates the reference date and window size', () => {
+  assert.throws(() => core.upcomingDays([], '2026-4-13', 3), /参考日期不正确/);
+  assert.throws(() => core.upcomingDays([], today, 0), /天数应为 1–31/);
+  assert.throws(() => core.upcomingDays([], today, 32), /天数应为 1–31/);
+  assert.equal(core.upcomingDays([], today, 31).length, 31);
+});
+
+test('upcomingDays spans month boundaries', () => {
+  const days = core.upcomingDays([task({ due: '2026-05-01' })], '2026-04-29', 4);
+  assert.deepEqual(days.map(day => day.date), ['2026-04-29', '2026-04-30', '2026-05-01', '2026-05-02']);
+  assert.deepEqual(days.map(day => day.count), [0, 0, 1, 0]);
+});

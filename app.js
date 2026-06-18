@@ -57,3 +57,29 @@ function editTask(task) {
   form.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
+function renderMetrics(today) {
+  const summary = core.summarize(state.tasks, today);
+  const metrics = $('#metrics');
+  metrics.replaceChildren();
+  const values = [
+    ['未完成', summary.active, `其中 ${summary.high} 项高优先`],
+    ['今天截止', summary.dueToday, '留给今天的一点专注'],
+    ['已经逾期', summary.overdue, '调整计划，重新出发'],
+    ['完成进度', summary.percent + '%', `共 ${summary.total} 项，已完成 ${summary.done} 项`]
+  ];
+  for (const [label, value, detail] of values) {
+    const card = element('article', 'stat');
+    card.append(element('span', 'muted', label), element('strong', '', value), element('p', 'muted', detail));
+    metrics.append(card);
+  }
+  const week = $('#week');
+  week.replaceChildren();
+  for (const [index, day] of core.upcomingDays(state.tasks, today).entries()) {
+    const label = index === 0 ? '今天' : day.date.slice(5).replace('-', '/');
+    const block = element('div', 'day' + (index === 0 ? ' today' : ''));
+    block.title = `${day.date}：${day.count} 项待办，${day.high} 项高优先`;
+    block.append(element('span', '', label), element('strong', '', String(day.count)));
+    week.append(block);
+  }
+}
+

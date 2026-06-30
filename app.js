@@ -83,3 +83,37 @@ function renderMetrics(today) {
   }
 }
 
+function taskButton(label, action, className = '') {
+  const button = element('button', className, label);
+  button.type = 'button';
+  button.addEventListener('click', () => attempt(action));
+  return button;
+}
+function renderTask(task, today) {
+  const card = element('article', 'task');
+  card.dataset.taskId = task.id;
+  const top = element('div', 'task-top');
+  const due = core.dueLabel(task, today);
+  top.append(element('span', 'priority ' + task.priority, priorities[task.priority]), element('span', 'due ' + due.tone, due.text));
+  card.append(top, element('h3', '', task.title));
+  if (task.notes) card.append(element('p', 'notes', task.notes));
+  if (task.tags.length) {
+    const tags = element('div', 'tags');
+    for (const tag of task.tags) tags.append(element('span', 'tag', tag));
+    card.append(tags);
+  }
+  const actions = element('div', 'task-actions');
+  actions.append(taskButton('编辑', () => editTask(task)));
+  actions.append(taskButton('复制', () => persist(core.duplicateTask(state, task.id), '已复制任务，副本放入待开始。')));
+  actions.append(taskButton('删除', () => {
+    if (!confirm(`删除“${task.title}”？`)) return;
+    persist(core.removeTask(state, task.id), '已删除任务。可使用下方撤销按钮恢复。');
+    if (editingId === task.id) resetForm();
+    offerUndo();
+  }, 'delete'));
+  if (task.status !== 'todo') actions.append(taskButton('← 退回', () => persist(core.moveTask(state, task.id, core.nextStatus(task.status, -1)), '任务已退回上一状态。')));
+  if (task.status !== 'done') actions.append(taskButton(task.status === 'todo' ? '开始 →' : '完成 ✓', () => persist(core.moveTask(state, task.id, core.nextStatus(task.status)), '任务已更新。'), 'advance'));
+  card.append(actions);
+  return card;
+}
+

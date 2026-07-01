@@ -13,3 +13,7 @@ test('groupByStatus keeps membership and totals consistent', () => {
   assert.equal(groups.todo.length + groups.doing.length + groups.done.length, tasks.length);
   assert.equal(groups.done.length, 2);
 });
+test('groupByStatus rejects unknown statuses and non-lists', () => {
+  assert.throws(() => core.groupByStatus([task({ status: 'paused' })]), /任务状态不正确/);
+  assert.throws(() => core.groupByStatus('nope'), /任务列表不正确/);
+});

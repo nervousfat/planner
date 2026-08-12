@@ -117,3 +117,40 @@ function renderTask(task, today) {
   return card;
 }
 
+function renderBoard(today) {
+  const filters = { search: $('#search').value, priority: $('#filter-priority').value, due: $('#filter-due').value };
+  const visible = core.sortTasks(core.queryTasks(state.tasks, filters, today), $('#sort').value);
+  const groups = core.groupByStatus(visible);
+  const board = $('#board');
+  board.replaceChildren();
+  $('#result-count').textContent = `显示 ${visible.length} / ${state.tasks.length} 个任务`;
+  const empties = { todo: '还没有待办任务。\n写下你的下一个小目标。', doing: '这里等待你的专注。\n点击“开始”推进一个任务。', done: '完成的任务会留在这里。\n每一步都值得记录。' };
+  for (const status of core.STATUSES) {
+    const column = element('section', 'column ' + status);
+    column.setAttribute('aria-label', names[status]);
+    const heading = element('div', 'column-head');
+    heading.append(element('span', 'status-dot'), element('h2', '', names[status]), element('span', 'badge', String(groups[status].length)));
+    column.append(heading);
+    for (const task of groups[status]) column.append(renderTask(task, today));
+    if (!groups[status].length) column.append(element('p', 'empty', visible.length !== state.tasks.length ? '没有符合筛选条件的任务。' : empties[status]));
+    board.append(column);
+  }
+  $('#clear-done').disabled = !state.tasks.some(task => task.status === 'done');
+}
+function render() {
+  const today = localToday();
+  $('#date-label').textContent = new Date(today + 'T12:00:00').toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
+  renderMetrics(today);
+  renderBoard(today);
+}
+function offerUndo() {
+  if (!undoState) return;
+  const target = undoState;
+  const button = taskButton('撤销刚才的操作', () => {
+    persist(target, '已撤销上一次操作。');
+    resetForm();
+  }, 'text-button');
+  button.style.marginLeft = '12px';
+  $('#status').append(button);
+}
+

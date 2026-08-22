@@ -13,3 +13,8 @@ test('clearCompleted removes finished tasks only', () => {
   const next = core.clearCompleted(state);
   assert.deepEqual(next.tasks.map(item => item.id), ['b']);
 });
+test('clearCompleted keeps states without finished tasks', () => {
+  const state = stateOf(task({ id: 'a' }));
+  assert.deepEqual(core.clearCompleted(state), state);
+  assert.deepEqual(core.clearCompleted(stateOf()).tasks, []);
+});

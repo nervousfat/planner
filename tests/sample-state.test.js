@@ -13,3 +13,8 @@ test('sampleState returns a valid board anchored to today', () => {
   }
   assert.equal(state.tasks.find(item => item.id === 'sample-1').due, today);
 });
+test('sampleState content survives normalization', () => {
+  const state = core.sampleState('2026-07-06');
+  assert.deepEqual(core.validateState(JSON.parse(core.exportState(state))), state);
+  assert.throws(() => core.sampleState('20260706'), /参考日期不正确/);
+});

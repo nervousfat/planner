@@ -154,3 +154,39 @@ function offerUndo() {
   $('#status').append(button);
 }
 
+form.addEventListener('submit', event => {
+  event.preventDefault();
+  attempt(() => {
+    const fields = Object.fromEntries(new FormData(form));
+    fields.tags = fields.tags.split(/[,，]/).map(tag => tag.trim()).filter(Boolean);
+    const editing = editingId !== null;
+    const next = editing ? core.updateTask(state, editingId, fields) : core.createTask(state, fields);
+    persist(next, editing ? '任务修改已保存。' : '已添加任务，开始迈出下一步。');
+    resetForm();
+  });
+});
+$('#cancel-edit').addEventListener('click', resetForm);
+for (const id of ['search', 'filter-priority', 'filter-due', 'sort']) {
+  $('#' + id).addEventListener(id === 'search' ? 'input' : 'change', render);
+}
+$('#reset-filters').addEventListener('click', () => {
+  $('#search').value = '';
+  $('#filter-priority').value = '';
+  $('#filter-due').value = '';
+  $('#sort').value = 'priority';
+  render();
+});
+$('#sample').addEventListener('click', () => attempt(() => {
+  if (state.tasks.length && !confirm('示例将替换当前任务。请先导出需要保留的数据。继续？')) return;
+  persist(core.sampleState(localToday()), '示例任务已加载，可自由编辑。');
+  resetForm();
+  offerUndo();
+}));
+$('#clear-done').addEventListener('click', () => attempt(() => {
+  const count = state.tasks.filter(task => task.status === 'done').length;
+  if (!count || !confirm(`清理 ${count} 个已完成任务？`)) return;
+  persist(core.clearCompleted(state), `已清理 ${count} 个已完成任务。`);
+  if (editingId && !state.tasks.some(task => task.id === editingId)) resetForm();
+  offerUndo();
+}));
+

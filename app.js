@@ -190,3 +190,49 @@ $('#clear-done').addEventListener('click', () => attempt(() => {
   offerUndo();
 }));
 
+$('#export').addEventListener('click', () => attempt(() => {
+  const blob = new Blob([core.exportState(state)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = element('a');
+  link.href = url;
+  link.download = `拾序任务-${localToday()}.json`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  notify('备份已导出。请妥善保存 JSON 文件。');
+}));
+$('#import').addEventListener('click', () => $('#import-file').click());
+$('#import-file').addEventListener('change', async event => {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  try {
+    if (file.size > 2_000_000) throw new Error('备份文件不能超过 2 MB');
+    const imported = core.importState(await file.text());
+    if (!confirm(`导入 ${imported.tasks.length} 个任务并替换当前列表？建议先导出当前数据。`)) return;
+    persist(imported, `已导入 ${imported.tasks.length} 个任务。`);
+    resetForm();
+    offerUndo();
+  } catch (error) {
+    notify(error.message, true);
+  }
+});
+window.addEventListener('storage', event => {
+  if (event.key !== KEY) return;
+  try {
+    state = event.newValue ? core.importState(event.newValue) : { version: 1, tasks: [] };
+    undoState = null;
+    resetForm();
+    render();
+    notify('任务已与另一个标签页同步。');
+  } catch (error) { notify('另一个标签页的数据无效：' + error.message, true); }
+});
+let startupError = '';
+try {
+  const saved = localStorage.getItem(KEY);
+  state = saved ? core.importState(saved) : { version: 1, tasks: [] };
+} catch (error) { startupError = '本地数据读取失败：' + error.message + '。可导入有效备份恢复。'; }
+render();
+if (startupError) notify(startupError, true);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });

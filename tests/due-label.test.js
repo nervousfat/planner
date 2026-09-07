@@ -21,3 +21,7 @@ test('dueLabel stays neutral for finished tasks', () => {
   assert.deepEqual(done, { text: '2026-09-01', tone: 'neutral' });
   assert.throws(() => core.dueLabel(task({}), '20260908'), /参考日期不正确/);
 });
+test('dueLabel validates stored due dates', () => {
+  assert.throws(() => core.dueLabel(task({ due: '2026-9-8' }), '2026-09-08'), /截止日期不正确/);
+  assert.throws(() => core.dueLabel(task({}), 'not-a-date'), /参考日期不正确/);
+});
